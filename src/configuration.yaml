@@ -1,0 +1,9 @@
+# Server port we are hosting webapp on
+application_port: 8000
+# Database connection details
+database:
+  host: "127.0.0.1"
+  port: 5432
+  username: "postgres"
+  password: "password"
+  database_name: "newsletter"

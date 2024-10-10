@@ -1,8 +1,8 @@
-use tracing::Subscriber;
 use tracing::subscriber::set_global_default;
+use tracing::Subscriber;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_log::LogTracer;
-use tracing_subscriber::{layer::SubscriberExt, EnvFilter, Registry, fmt::MakeWriter};
+use tracing_subscriber::{fmt::MakeWriter, layer::SubscriberExt, EnvFilter, Registry};
 
 /// Compose multiple layers into a `tracing`'s subscriber.
 ///
@@ -14,12 +14,17 @@ use tracing_subscriber::{layer::SubscriberExt, EnvFilter, Registry, fmt::MakeWri
 /// We need to explicitly call out that the returned subscriber is
 /// `Send` and `Sync` to make it possible to pass it to `init_subscriber`
 /// later on.
-pub fn get_subscriber<Sink>(name: String, env_filter: String, sink: Sink) -> impl Subscriber + Send + Sync
-    where
-        Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,
+pub fn get_subscriber<Sink>(
+    name: String,
+    env_filter: String,
+    sink: Sink,
+) -> impl Subscriber + Send + Sync
+where
+    Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,
 {
     // We are falling back to printing all spans at the info level or above
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
+    let env_filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
     let formatting_layer = BunyanFormattingLayer::new(name, sink);
     // The `with` method is provided by `SubscriberExt`, an extension
     // trait for `Subscriber` exposed by `tracing_subscriber`

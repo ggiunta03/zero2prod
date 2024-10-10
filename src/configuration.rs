@@ -1,6 +1,5 @@
-use secrecy::Secret;
 use secrecy::ExposeSecret;
-use tracing_subscriber::fmt::format;
+use secrecy::Secret;
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -34,8 +33,12 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     // Initialize our configuration reader
     let settings = config::Config::builder()
         // Add configuration values from a file name 'configuration.yaml'
-        .add_source(config::File::from(configuration_directory.join("base.yaml")))
-        .add_source(config::File::from(configuration_directory.join(environment_filename)))
+        .add_source(config::File::from(
+            configuration_directory.join("base.yaml"),
+        ))
+        .add_source(config::File::from(
+            configuration_directory.join(environment_filename),
+        ))
         .build()?;
     // Try to convert the configuration values it read into our Settings type
     settings.try_deserialize::<Settings>()
@@ -61,7 +64,10 @@ impl TryFrom<String> for Environment {
         match s.to_lowercase().as_str() {
             "local" => Ok(Self::Local),
             "production" => Ok(Self::Production),
-            other => Err(format!("{} is not a supported environment. Use either local or producton.", other)),
+            other => Err(format!(
+                "{} is not a supported environment. Use either local or producton.",
+                other
+            )),
         }
     }
 }
@@ -71,7 +77,11 @@ impl DatabaseSettings {
         // Return string to connect to our database with
         Secret::new(format!(
             "postgres://{}:{}@{}:{}/{}",
-            self.username, self.password.expose_secret(), self.host, self.port, self.database_name
+            self.username,
+            self.password.expose_secret(),
+            self.host,
+            self.port,
+            self.database_name
         ))
     }
 }
